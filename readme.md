@@ -9,3 +9,5 @@ Contents:
 3. [ToDo API (Demo)](./todo-api/).  This directory contains a demo/technical tutorial that we will be using to explore creating APIs in go
 4. [GCP IaaS (Demo)](./infrastructure-automation/).  This directory contains a demo/technical tutorial on using automation to create a virtual machine in the cloud and push some code to it. There are 2 sub-demos, one showing the use of Terraform, which is an industry leading automation tool, and the other using Pulumi, that embraces using traditional programming languages, versus a custom configuration-as-code format.
 5. [ToDo API With Events (Demo)](./todo-api-w-events/).  This directory an extension of the basic `todo-api`.  It illustrates `goroutines`, `channels`, and `events`
+
+Deepali 
