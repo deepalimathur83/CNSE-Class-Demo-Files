@@ -27,7 +27,8 @@ type DbMap map[int]ToDoItem
 //	   	 (they are lowercase).  Describe why you think this is
 //		 a good design decision.
 //
-// ANSWER: <GOES HERE>
+// ANSWER: <<If it's lowercase, it can only be accessed within the package it's defined in. The ToDo struct in your code has its fields toDoMap and dbFileName unexported (lowercase). This means they can only be accessed within the db package.
+// This is a good design decision because it encapsulates the data and prevents it from being modified unexpectedly by other parts of the programs>
 type ToDo struct {
 	toDoMap    DbMap
 	dbFileName string
