@@ -22,7 +22,7 @@ import (
 // project has a /tests path where you are at and a /data path where the
 // database file sits.  So to get there we need to back up a directory and
 // then go into the /data directory.  Thus this is why we are setting the
-// default file name to "../data/todo.json"
+// default file name to "../data/todo.json"a
 const (
 	DEFAULT_DB_FILE_NAME = "../data/todo.json"
 )
@@ -73,11 +73,14 @@ func TestAddHardCodedItem(t *testing.T) {
 	//I will get you started, uncomment the lines below to add to the DB
 	//and ensure no errors:
 	//---------------------------------------------------------------
-	//err := DB.AddItem(item)
-	//assert.NoError(t, err, "Error adding item to DB")
+	err := DB.AddItem(item)
+	assert.NoError(t, err, "Error adding item to DB")
+	retrievedItem, err := DB.GetItem(item.Id)
+	assert.NoError(t, err, "Error retrieving item from DB")
+	assert.Equal(t, item, retrievedItem, "Retrieved item does not match with the added item")
 
-	//TODO: Now finish the test case by looking up the item in the DB
-	//and making sure it matches the item that you put in the DB above
+	// TODO: Now finish the test case by looking up the item in the DB
+	// and making sure it matches the item that you put in the DB above
 }
 
 func TestAddRandomStructItem(t *testing.T) {
@@ -90,6 +93,14 @@ func TestAddRandomStructItem(t *testing.T) {
 	assert.NoError(t, err, "Created fake item OK")
 
 	//TODO: Complete the test
+
+	err = DB.AddItem(item)
+	assert.NoError(t, err, "Error adding item added to DB")
+
+	retrievedItem, err := DB.GetItem(item.Id)
+	assert.NoError(t, err, "Error retrieving item fromDB")
+
+	assert.Equal(t, item, retrievedItem, "Retrieved item does not match with the added item")
 }
 
 func TestAddRandomItem(t *testing.T) {
@@ -113,6 +124,56 @@ func TestAddPlaceholderTest(t *testing.T) {
 	t.Skip("Placeholder test not implemented yet")
 }
 
-//TODO: Create additional tests to showcase the correct operation of your program
-//for example getting an item, getting all items, updating items, and so on. Be
-//creative here.
+// TODO: Create additional tests to showcase the correct operation of your program
+// for example getting an item, getting all items, updating items, and so on. Be
+// creative here.
+func TestGetItem(t *testing.T) {
+	// Add an item to the DB
+	item := db.ToDoItem{
+		Id:     fake.Number(400, 510),
+		Title:  fake.JobTitle(),
+		IsDone: fake.Bool(),
+	}
+	err := DB.AddItem(item)
+	assert.NoError(t, err, "Error adding item to DB")
+
+	retrievedItem, err := DB.GetItem(item.Id)
+	assert.NoError(t, err, "Error retrieving item from DB")
+
+	assert.Equal(t, item, retrievedItem, "Retrieved item does not match the added item")
+}
+func TestGetAllItems(t *testing.T) {
+
+	for i := 0; i < 5; i++ {
+		item := db.ToDoItem{
+			Id:     fake.Number(410, 610),
+			Title:  fake.JobTitle(),
+			IsDone: fake.Bool(),
+		}
+		err := DB.AddItem(item)
+		assert.NoError(t, err, "Error adding item to DB")
+	}
+
+	items, err := DB.GetAllItems()
+	assert.NoError(t, err, "Error retrieving all items from DB")
+
+	assert.Equal(t, 5, len(items), "Number of retrieved items does not match the number of added items")
+}
+func TestUpdateItem(t *testing.T) {
+	item := db.ToDoItem{
+		Id:     fake.Number(200, 710),
+		Title:  fake.JobTitle(),
+		IsDone: fake.Bool(),
+	}
+	err := DB.AddItem(item)
+	assert.NoError(t, err, "Error adding item to DB")
+
+	item.IsDone = !item.IsDone
+	err = DB.UpdateItem(item)
+	assert.NoError(t, err, "Error updating item in DB")
+
+	updatedItem, err := DB.GetItem(item.Id)
+	assert.NoError(t, err, "Error retrieving updated item from DB")
+
+	assert.Equal(t, item, updatedItem, "Updated item does not match the updated original item")
+}

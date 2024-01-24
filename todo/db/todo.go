@@ -2,8 +2,8 @@ package db
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -103,9 +103,25 @@ func (t *ToDo) RestoreDB() error {
 	//				defer srcFile.Close()
 
 	// TODO: Implement this function
-	fmt.Println("RestoreDB() is not implemented")
-	fmt.Println("DB File:", dbFileName)
-	fmt.Println("Backup DB File:", backupFileName)
+	srcFile, err := os.Open(backupFileName)
+	if err != nil {
+		return fmt.Errorf("error opening backup file: %w", err)
+	}
+	defer srcFile.Close()
+
+	destFile, err := os.Create(dbFileName)
+	if err != nil {
+		return fmt.Errorf("error creating destination file: %w", err)
+	}
+	defer destFile.Close()
+
+	_, err = io.Copy(destFile, srcFile)
+	if err != nil {
+		return fmt.Errorf("error copying file: %w", err)
+	}
+	//fmt.Println("RestoreDB() is not implemented")
+	//fmt.Println("DB File:", dbFileName)
+	//fmt.Println("Backup DB File:", backupFileName)
 	return nil
 }
 
@@ -138,8 +154,24 @@ func (t *ToDo) AddItem(item ToDoItem) error {
 	//If everything there are no errors, this function should return nil
 	//at the end to indicate that the item was properly added to the
 	//database.
+	err := t.loadDB()
+	if err != nil {
+		return fmt.Errorf("failed to load database: %v", err)
+	}
 
-	return errors.New("AddItem() is currently not implemented")
+	if _, ok := t.toDoMap[item.Id]; ok {
+		return fmt.Errorf("item with id %d already exists", item.Id)
+	}
+
+	t.toDoMap[item.Id] = item
+
+	err = t.saveDB()
+	if err != nil {
+		return fmt.Errorf("failed to save database: %v", err)
+	}
+	return nil
+
+	//return errors.New("AddItem() is currently not implemented")
 }
 
 // DeleteItem accepts an item id and removes it from the DB.
@@ -168,7 +200,23 @@ func (t *ToDo) DeleteItem(id int) error {
 	//return nil at the end to indicate that the item was properly deleted
 	//from the database.
 
-	return errors.New("DeleteItem() is currently not implemented")
+	err := t.loadDB()
+	if err != nil {
+		return fmt.Errorf("failed to load database: %v", err)
+	}
+	if _, ok := t.toDoMap[id]; !ok {
+		return fmt.Errorf("item with id %d does not exist", id)
+	}
+
+	delete(t.toDoMap, id)
+
+	err = t.saveDB()
+	if err != nil {
+		return fmt.Errorf("failed to save database: %v", err)
+	}
+	return nil
+
+	//return errors.New("DeleteItem() is currently not implemented")
 }
 
 // UpdateItem accepts a ToDoItem and updates it in the DB.
@@ -196,8 +244,22 @@ func (t *ToDo) UpdateItem(item ToDoItem) error {
 	//any errors, return them, as appropriate.  If everything there are
 	//no errors, this function should return nil at the end to indicate
 	//that the item was properly updated in the database.
+	err := t.loadDB()
+	if err != nil {
+		return fmt.Errorf("failed to load database: %v", err)
+	}
+	if _, ok := t.toDoMap[item.Id]; !ok {
+		return fmt.Errorf("item with id %d does not exist", item.Id)
+	}
+	t.toDoMap[item.Id] = item
+	err = t.saveDB()
+	if err != nil {
+		return fmt.Errorf("failed to save database: %v", err)
 
-	return errors.New("UpdateItem() is currently not implemented")
+	}
+	return nil
+
+	// return errors.New("UpdateItem() is currently not implemented")
 }
 
 // GetItem accepts an item id and returns the item from the DB.
@@ -216,19 +278,29 @@ func (t *ToDo) UpdateItem(item ToDoItem) error {
 //		(3) The database file will not be modified
 func (t *ToDo) GetItem(id int) (ToDoItem, error) {
 	//TODO: Implement this function
-	//Like the add, delete, and update functions, start by loading the
-	//database into the private map in our struct.  Then make sure the
-	//item we want to get exists in the map.  After all we cannot get
-	//an item that is not in the database. If the item is in our internal
-	//map t.toDoMap, then return it.  You can do this by simply returning
-	//the item from the map.  We covered this in the go tutorial.  If there
-	//are any errors, return them, as appropriate.  If everything there are
-	//no errors, this function should return the item requested and nil
-	//as the error value the end to indicate that the item was
-	//properly returned from the database.
-
-	return ToDoItem{}, errors.New("GetItem() is currently not implemented")
+	err := t.loadDB()
+	if err != nil {
+		return ToDoItem{}, fmt.Errorf("failed to load database: %v", err)
+	}
+	item, ok := t.toDoMap[id]
+	if !ok {
+		return ToDoItem{}, fmt.Errorf("item with id %d does not exist", id)
+	}
+	return item, nil
 }
+
+//Like the add, delete, and update functions, start by loading the
+//database into the private map in our struct.  Then make sure the
+//item we want to get exists in the map.  After all we cannot get
+//an item that is not in the database. If the item is in our internal
+//map t.toDoMap, then return it.  You can do this by simply returning
+//the item from the map.  We covered this in the go tutorial.  If there
+//are any errors, return them, as appropriate.  If everything there are
+//no errors, this function should return the item requested and nil
+//as the error value the end to indicate that the item was
+//properly returned from the database.
+
+//return ToDoItem{}, errors.New("GetItem() is currently not implemented")
 
 // GetAllItems returns all items from the DB.  If successful it
 // returns a slice of all of the items to the caller
@@ -242,6 +314,16 @@ func (t *ToDo) GetItem(id int) (ToDoItem, error) {
 //		(3) The database file will not be modified
 func (t *ToDo) GetAllItems() ([]ToDoItem, error) {
 	//TODO: Implement this function
+	err := t.loadDB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load database: %v", err)
+	}
+	var items []ToDoItem
+	for _, item := range t.toDoMap {
+		items = append(items, item)
+	}
+	return items, nil
+
 	//Like many of the other functions start by loading the database into
 	//the private map in our struct.  Dont forget to return nil and an
 	//appropriate error if the database cannot be loaded. Next create an
@@ -252,7 +334,7 @@ func (t *ToDo) GetAllItems() ([]ToDoItem, error) {
 	//Finally, if there were no errors along the way, return the slice
 	//and nil as the error value.
 
-	return nil, errors.New("GetAllItems() is currently not implemented")
+	//return nil, errors.New("GetAllItems() is currently not implemented")
 }
 
 // PrintItem accepts a ToDoItem and prints it to the console
@@ -307,7 +389,20 @@ func (t *ToDo) JsonToItem(jsonString string) (ToDoItem, error) {
 //			from the DB, then it should call UpdateItem() to update the
 //			item in the DB (after the status is changed).
 func (t *ToDo) ChangeItemDoneStatus(id int, value bool) error {
+
 	//TODO: Implement this function for EXTRA CREDIT if you want
+	item, err := t.GetItem(id)
+	if err != nil {
+		return fmt.Errorf("failed to get item: %v", err)
+	}
+	item.IsDone = value
+
+	err = t.UpdateItem(item)
+	if err != nil {
+		return fmt.Errorf("failed to update item: %v", err)
+	}
+
+	return nil
 	//This function builds on all of the other functions you have
 	//implemented.  It should call GetItem() to get the item from
 	//the DB, then it should call UpdateItem() to update the item
@@ -315,7 +410,7 @@ func (t *ToDo) ChangeItemDoneStatus(id int, value bool) error {
 	//errors along the way, return them.  If everything is successful
 	//return nil at the end to indicate that the item was properly
 
-	return errors.New("ChangeItemDoneStatus() is currently not implemented")
+	//return errors.New("ChangeItemDoneStatus() is currently not implemented")
 }
 
 //------------------------------------------------------------
