@@ -46,6 +46,7 @@ func init() {
 	DB = testdb //setup the global DB variable to support test cases
 
 	//Now lets start with a fresh DB with the sample test data
+
 	testdb.RestoreDB()
 }
 
@@ -74,9 +75,13 @@ func TestAddHardCodedItem(t *testing.T) {
 	//and ensure no errors:
 	//---------------------------------------------------------------
 	err := DB.AddItem(item)
+
 	assert.NoError(t, err, "Error adding item to DB")
+
 	retrievedItem, err := DB.GetItem(item.Id)
+
 	assert.NoError(t, err, "Error retrieving item from DB")
+
 	assert.Equal(t, item, retrievedItem, "Retrieved item does not match with the added item")
 
 	// TODO: Now finish the test case by looking up the item in the DB
@@ -95,16 +100,20 @@ func TestAddRandomStructItem(t *testing.T) {
 	//TODO: Complete the test
 
 	err = DB.AddItem(item)
+
 	assert.NoError(t, err, "Error adding item added to DB")
 
 	retrievedItem, err := DB.GetItem(item.Id)
+
 	assert.NoError(t, err, "Error retrieving item fromDB")
 
 	assert.Equal(t, item, retrievedItem, "Retrieved item does not match with the added item")
 }
 
 func TestAddRandomItem(t *testing.T) {
+
 	//Lets use the fake helper to create random data for the item
+
 	item := db.ToDoItem{
 		Id:     fake.Number(100, 110),
 		Title:  fake.JobTitle(),
@@ -113,67 +122,100 @@ func TestAddRandomItem(t *testing.T) {
 
 	t.Log("Testing Adding an Item with Random Fields: ", item)
 
-}
+	err := DB.AddItem(item)
 
-// TODO: Please delete this test from your submission, it does not do anything
-// but i wanted to demonstrate how you can starting shelling out your tests
-// and then implment them later.  The go testing framework provides a
-// Skip() function that just tells the testing framework to skip or ignore
-// this test function
-func TestAddPlaceholderTest(t *testing.T) {
-	t.Skip("Placeholder test not implemented yet")
+	assert.NoError(t, err, "Failed to add item to DB")
+
+	dbItem, err := DB.GetItem(item.Id)
+
+	assert.NoError(t, err, "Failed to get item from DB")
+
+	assert.Equal(t, item, dbItem, "Failed to match items")
+
 }
 
 // TODO: Create additional tests to showcase the correct operation of your program
-// for example getting an item, getting all items, updating items, and so on. Be
+// for example RestoreDB,AddItem,getItem, getall items, updating items,DeleteItem and so on. Be
 // creative here.
-func TestGetItem(t *testing.T) {
-	// Add an item to the DB
+
+func TestAddItem(t *testing.T) {
+
 	item := db.ToDoItem{
-		Id:     fake.Number(400, 510),
-		Title:  fake.JobTitle(),
-		IsDone: fake.Bool(),
+		Id:     777,
+		Title:  "James Bond",
+		IsDone: false,
 	}
 	err := DB.AddItem(item)
+
 	assert.NoError(t, err, "Error adding item to DB")
 
 	retrievedItem, err := DB.GetItem(item.Id)
-	assert.NoError(t, err, "Error retrieving item from DB")
 
-	assert.Equal(t, item, retrievedItem, "Retrieved item does not match the added item")
+	assert.NoError(t, err, "Error retrieving item fromDB")
+
+	assert.Equal(t, item, retrievedItem, "Retrieved item does not match with the added item")
 }
-func TestGetAllItems(t *testing.T) {
+func TestGETITEM(t *testing.T) {
+	expectedItem := db.ToDoItem{
 
-	for i := 0; i < 5; i++ {
-		item := db.ToDoItem{
-			Id:     fake.Number(410, 610),
-			Title:  fake.JobTitle(),
-			IsDone: fake.Bool(),
-		}
-		err := DB.AddItem(item)
-		assert.NoError(t, err, "Error adding item to DB")
+		Id:     3,
+		Title:  "Learn Clound Navite Architecture",
+		IsDone: false,
 	}
+	actualItem, err := DB.GetItem(3)
 
+	assert.NoError(t, err, " Error in getting item")
+
+	assert.Equal(t, expectedItem, actualItem)
+
+}
+func TestGETALLITEMS(t *testing.T) {
 	items, err := DB.GetAllItems()
-	assert.NoError(t, err, "Error retrieving all items from DB")
 
-	assert.Equal(t, 5, len(items), "Number of retrieved items does not match the number of added items")
-}
-func TestUpdateItem(t *testing.T) {
-	item := db.ToDoItem{
-		Id:     fake.Number(200, 710),
-		Title:  fake.JobTitle(),
-		IsDone: fake.Bool(),
+	assert.NoError(t, err, "Error in getting all items")
+
+	assert.GreaterOrEqual(t, len(items), 4, "Minimum 4 items in DB")
+
+	for _, item := range items {
+		t.Logf("Item ID: %d, Title: %s, IsDone: %v\n", item.Id, item.Title, item.IsDone)
 	}
+}
+
+func TestUPDATEITEM(t *testing.T) {
+	updatedItem := db.ToDoItem{
+
+		Id:     2,
+		Title:  "Kubernetes",
+		IsDone: true,
+	}
+	err := DB.UpdateItem(updatedItem)
+	assert.NoError(t, err, "Error updating item.")
+
+	actualItem, err := DB.GetItem(4)
+
+	assert.NoError(t, err, "Error getting item")
+
+	assert.Equal(t, updatedItem, actualItem, "updated item doesn't match.")
+
+}
+
+func TestDeleteITEM(t *testing.T) {
+	item := db.ToDoItem{
+
+		Id:     778,
+		Title:  "This is a test case item.",
+		IsDone: false,
+	}
+
 	err := DB.AddItem(item)
-	assert.NoError(t, err, "Error adding item to DB")
 
-	item.IsDone = !item.IsDone
-	err = DB.UpdateItem(item)
-	assert.NoError(t, err, "Error updating item in DB")
+	assert.NoError(t, err, "Error adding item")
 
-	updatedItem, err := DB.GetItem(item.Id)
-	assert.NoError(t, err, "Error retrieving updated item from DB")
+	err = DB.DeleteItem(778)
 
-	assert.Equal(t, item, updatedItem, "Updated item does not match the updated original item")
+	assert.NoError(t, err, "Error deleting item")
+
+	_, err = DB.GetItem(778)
+	assert.EqualError(t, err, "Id not found.")
+
 }

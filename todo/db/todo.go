@@ -155,11 +155,13 @@ func (t *ToDo) AddItem(item ToDoItem) error {
 	//at the end to indicate that the item was properly added to the
 	//database.
 	err := t.loadDB()
+
 	if err != nil {
 		return fmt.Errorf("failed to load database: %v", err)
 	}
 
 	if _, ok := t.toDoMap[item.Id]; ok {
+
 		return fmt.Errorf("item with id %d already exists", item.Id)
 	}
 

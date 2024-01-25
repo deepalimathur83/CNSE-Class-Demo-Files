@@ -57,10 +57,10 @@ const (
 //						   use it.  See github.com/spf13/cobra for information
 //						   on how to use it.
 //
-//	 YOUR ANSWER: <Flag package is used to define and parse command line flags. In below function we are defining flags
-//	 for different operations like list, restore, query, add, update, delete and change status.
-//	 We are using switch case to check which flag is set and updating appOpt with respective action operation constant.
-//	 And we are also checking if flag is not implemented or flag is invalid or flag is not set and printing usage information in CLI>
+//	YOUR ANSWER: <This Function is designed to facilitate the setup of flag options, and subsequently assign the argument associated eith each flag to the variable for that flag
+// If no flag are set , the function returns an error. Following this the function sorts all flags passed in alphabetical order to ascertain the requested operation.
+// It is important to note that only the last command in the albhabetcal order with be exceuted . If no valid option is provided, the function prints the usage instruction and return an error>
+
 func processCmdLineFlags() (AppOptType, error) {
 	flag.StringVar(&dbFileNameFlag, "db", "./data/todo.json", "Name of the database file")
 	flag.BoolVar(&restoreDbFlag, "restore", false, "Restore the database from the backup file")
@@ -112,7 +112,12 @@ func processCmdLineFlags() (AppOptType, error) {
 		case "s":
 			//For extra credit you will need to change some things here
 			//and also in main under the CHANGE_ITEM_STATUS case
-			appOpt = CHANGE_ITEM_STATUS
+			if appOpt == QUERY_DB_ITEM {
+				appOpt = CHANGE_ITEM_STATUS
+			} else {
+				appOpt = INVALID_APP_OPT
+			}
+
 		default:
 			appOpt = INVALID_APP_OPT
 		}
