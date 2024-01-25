@@ -394,17 +394,14 @@ func (t *ToDo) ChangeItemDoneStatus(id int, value bool) error {
 
 	//TODO: Implement this function for EXTRA CREDIT if you want
 	item, err := t.GetItem(id)
+
 	if err != nil {
-		return fmt.Errorf("failed to get item: %v", err)
+		return err
 	}
 	item.IsDone = value
 
-	err = t.UpdateItem(item)
-	if err != nil {
-		return fmt.Errorf("failed to update item: %v", err)
-	}
+	return t.UpdateItem(item)
 
-	return nil
 	//This function builds on all of the other functions you have
 	//implemented.  It should call GetItem() to get the item from
 	//the DB, then it should call UpdateItem() to update the item

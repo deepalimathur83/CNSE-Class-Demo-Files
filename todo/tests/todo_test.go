@@ -158,11 +158,11 @@ func TestAddItem(t *testing.T) {
 func TestGETITEM(t *testing.T) {
 	expectedItem := db.ToDoItem{
 
-		Id:     3,
-		Title:  "Learn Clound Navite Architecture",
+		Id:     1,
+		Title:  "Learn Go / GoLang",
 		IsDone: false,
 	}
-	actualItem, err := DB.GetItem(3)
+	actualItem, err := DB.GetItem(1)
 
 	assert.NoError(t, err, " Error in getting item")
 
@@ -184,14 +184,15 @@ func TestGETALLITEMS(t *testing.T) {
 func TestUPDATEITEM(t *testing.T) {
 	updatedItem := db.ToDoItem{
 
-		Id:     2,
-		Title:  "Kubernetes",
+		Id:     1,
+		Title:  "Learn Go / GoLang",
 		IsDone: true,
 	}
 	err := DB.UpdateItem(updatedItem)
+
 	assert.NoError(t, err, "Error updating item.")
 
-	actualItem, err := DB.GetItem(4)
+	actualItem, err := DB.GetItem(1)
 
 	assert.NoError(t, err, "Error getting item")
 
@@ -199,23 +200,18 @@ func TestUPDATEITEM(t *testing.T) {
 
 }
 
-func TestDeleteITEM(t *testing.T) {
+func TestDeleteItem(t *testing.T) {
 	item := db.ToDoItem{
-
-		Id:     778,
-		Title:  "This is a test case item.",
+		Id:     650,
+		Title:  "This is a test case item",
 		IsDone: false,
 	}
-
 	err := DB.AddItem(item)
+	assert.NoError(t, err, "Error adding item.")
 
-	assert.NoError(t, err, "Error adding item")
+	err = DB.DeleteItem(650)
+	assert.NoError(t, err, "Error deleting item.")
 
-	err = DB.DeleteItem(778)
-
-	assert.NoError(t, err, "Error deleting item")
-
-	_, err = DB.GetItem(778)
-	assert.EqualError(t, err, "Id not found.")
-
+	_, err = DB.GetItem(650)
+	assert.EqualError(t, err, "item with id 650 does not exist")
 }

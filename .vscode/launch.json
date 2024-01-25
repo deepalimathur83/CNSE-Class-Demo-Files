@@ -1,0 +1,12 @@
+{
+    "configurations": [
+    {
+        "name": "Test Change Status",
+        "type": "go",
+        "request": "launch",
+        "mode": "auto",
+        "program": "./todo",
+        
+    }
+    ]
+}

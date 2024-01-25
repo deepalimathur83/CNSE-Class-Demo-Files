@@ -1,6 +1,6 @@
 module drexel.edu/todo
 
-go 1.21
+go 1.21.6
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.26.3 // indirect
