@@ -9,6 +9,7 @@ package tests
 //of helper functions to generate random data to make testing easier.
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -137,6 +138,86 @@ func TestAddRandomItem(t *testing.T) {
 // TODO: Create additional tests to showcase the correct operation of your program
 // for example RestoreDB,AddItem,getItem, getall items, updating items,DeleteItem and so on. Be
 // creative here.
+func TestRestoreDB(t *testing.T) {
+	item := db.ToDoItem{}
+	err := fake.Struct(&item)
+	t.Log("Testing Adding a Randomly Generated Struct: ", item)
+
+	assert.NoError(t, err, "Created fake item OK")
+
+	//TODO: Complete the test
+
+	err = DB.AddItem(item)
+
+	assert.NoError(t, err, "Error adding item added to DB")
+
+	filepath := DEFAULT_DB_FILE_NAME
+
+	err = os.Remove(filepath)
+	if err != nil {
+		fmt.Println("Could not remove filepath. This may be okay proceeding with test.")
+	}
+
+	err = DB.RestoreDB()
+	assert.NoError(t, err, "Error Ehile restoring database")
+
+	isDBFileEqual, err := isDBFileEqual(t, filepath, filepath+".bak")
+	assert.NoError(t, err, "Error Occurred comparing Files")
+	assert.Equal(t, true, isDBFileEqual)
+
+}
+func isDBFileEqual(t *testing.T, filepath string, backupFile string) (bool, error) {
+	content, err := os.Open(filepath)
+	if err != nil {
+		fmt.Println("Failed to open file")
+
+		return false, errors.New("Failed to open file")
+	}
+
+	backupContent, err := os.Open(backupFile)
+	if err != nil {
+		fmt.Println("Failed to open file")
+
+		return false, errors.New("Failed to open backupfile")
+	}
+
+	fileBuffer := make([]byte, 4096)
+	backupFileBuffer := make([]byte, 4096)
+
+	for {
+		lenOfBytes, err := content.Read(fileBuffer)
+
+		if err != nil && err.Error() != "EOF" {
+			return false, err
+		}
+
+		lenOfBackupBytes, err := backupContent.Read(backupFileBuffer)
+
+		if err != nil && err.Error() != "EOF" {
+			return false, err
+		}
+
+		if lenOfBytes != lenOfBackupBytes {
+			return false, nil
+
+		}
+
+		if lenOfBytes == 0 {
+
+			break
+
+		}
+
+		for i := range fileBuffer {
+			if fileBuffer[i] != backupFileBuffer[i] {
+				return false, nil
+			}
+
+		}
+
+	}
+	return true, nil
+}
 
 func TestAddItem(t *testing.T) {
 
@@ -214,4 +295,16 @@ func TestDeleteItem(t *testing.T) {
 
 	_, err = DB.GetItem(650)
 	assert.EqualError(t, err, "item with id 650 does not exist")
+}
+
+func TestChangeItemDoneStatus(t *testing.T) {
+
+	err := DB.ChangeItemDoneStatus(1, true)
+	assert.NoError(t, err, "No error updating item")
+
+	item, err := DB.GetItem(1)
+	assert.NoError(t, err, "Error getting item.")
+
+	assert.Equal(t, true, item.IsDone, "Item status not updated")
+
 }

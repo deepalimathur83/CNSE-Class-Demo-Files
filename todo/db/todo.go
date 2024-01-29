@@ -46,7 +46,9 @@ func New(dbFile string) (*ToDo, error) {
 	//In this case, we are only checking the error, because if we get an
 	//error we can safely assume that this file does not exist.
 	if _, err := os.Stat(dbFile); err != nil {
+
 		//If the file doesn't exist, create it
+
 		err := initDB(dbFile)
 		if err != nil {
 			return nil, err
@@ -55,8 +57,11 @@ func New(dbFile string) (*ToDo, error) {
 
 	//Now that we know the file exists, at at the minimum we have
 	//a valid empty DB, lets create the ToDo struct
+
 	toDo := &ToDo{
-		toDoMap:    make(map[int]ToDoItem),
+
+		toDoMap: make(map[int]ToDoItem),
+
 		dbFileName: dbFile,
 	}
 
@@ -116,6 +121,7 @@ func (t *ToDo) RestoreDB() error {
 	defer destFile.Close()
 
 	_, err = io.Copy(destFile, srcFile)
+
 	if err != nil {
 		return fmt.Errorf("error copying file: %w", err)
 	}
