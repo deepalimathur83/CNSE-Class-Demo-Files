@@ -44,8 +44,10 @@ func processCmdLineFlags(cmd *cobra.Command) (AppOptType, error) {
 	var appOpt AppOptType = INVALID_APP_OPT
 
 	//show help if no flags are set
+
 	if len(os.Args) == 1 {
-		cmd.Flags().Usage()
+		cmd.Help()
+
 		return appOpt, errors.New("no flags were set")
 	}
 
@@ -77,15 +79,11 @@ func processCmdLineFlags(cmd *cobra.Command) (AppOptType, error) {
 		//you want to change.  I recommend you use the -q option to
 		//specify the item id.  Therefore, the -s option is only valid
 		//if the -q option is also set
-		case "s":
+		case "status":
 			//For extra credit you will need to change some things here
 			//and also in main under the CHANGE_ITEM_STATUS case
 
-			if appOpt == QUERY_DB_ITEM {
-				appOpt = CHANGE_ITEM_STATUS
-			} else {
-				appOpt = INVALID_APP_OPT
-			}
+			appOpt = CHANGE_ITEM_STATUS
 
 		default:
 			appOpt = INVALID_APP_OPT
@@ -93,8 +91,11 @@ func processCmdLineFlags(cmd *cobra.Command) (AppOptType, error) {
 	})
 
 	if appOpt == INVALID_APP_OPT || appOpt == NOT_IMPLEMENTED {
+
 		fmt.Println("Invalid option set or the desired option is not currently implemented")
+
 		cmd.Help()
+
 		return appOpt, errors.New("no flags or unimplemented were set")
 	}
 

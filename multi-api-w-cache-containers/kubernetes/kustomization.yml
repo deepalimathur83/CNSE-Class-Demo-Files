@@ -1,8 +1,0 @@
-resources:
-  - namespace.yml
-  - idp-deploy.yml
-  - ingress-config.yml
-  - pubapi.yml
-  - publistapi.yml
-  - redis.yml
-  - storage.yml

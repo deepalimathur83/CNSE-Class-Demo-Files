@@ -396,9 +396,11 @@ func (t *ToDo) JsonToItem(jsonString string) (ToDoItem, error) {
 //			work.  For example, it should call GetItem() to get the item
 //			from the DB, then it should call UpdateItem() to update the
 //			item in the DB (after the status is changed).
+
 func (t *ToDo) ChangeItemDoneStatus(id int, value bool) error {
 
 	//TODO: Implement this function for EXTRA CREDIT if you want
+
 	item, err := t.GetItem(id)
 
 	if err != nil {
